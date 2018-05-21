@@ -8,6 +8,7 @@ import ru.alexsumin.spring5recipeapp.commands.RecipeCommand;
 import ru.alexsumin.spring5recipeapp.converters.RecipeCommandToRecipe;
 import ru.alexsumin.spring5recipeapp.converters.RecipeToRecipeCommand;
 import ru.alexsumin.spring5recipeapp.domain.Recipe;
+import ru.alexsumin.spring5recipeapp.exceptions.NotFoundException;
 import ru.alexsumin.spring5recipeapp.repositories.RecipeRepository;
 
 import java.util.HashSet;
@@ -54,8 +55,20 @@ public class RecipeServiceImplTest {
         verify(recipeRepository, never()).findAll();
     }
 
+    @Test(expected = NotFoundException.class)
+    public void getRecipeByIdTestNotFound() throws Exception {
+
+        Optional<Recipe> recipeOptional = Optional.empty();
+
+        when(recipeRepository.findById(anyLong())).thenReturn(recipeOptional);
+
+        Recipe recipeReturned = recipeService.findById(1L);
+
+        //should go boom
+    }
+
     @Test
-    public void getRecipeCoomandByIdTest() throws Exception {
+    public void getRecipeCommandByIdTest() throws Exception {
         Recipe recipe = new Recipe();
         recipe.setId(1L);
         Optional<Recipe> recipeOptional = Optional.of(recipe);
@@ -92,11 +105,16 @@ public class RecipeServiceImplTest {
 
     @Test
     public void testDeleteById() throws Exception {
+
+        //given
         Long idToDelete = Long.valueOf(2L);
+
+        //when
         recipeService.deleteById(idToDelete);
 
+        //no 'when', since method has void return type
 
+        //then
         verify(recipeRepository, times(1)).deleteById(anyLong());
     }
-
 }
